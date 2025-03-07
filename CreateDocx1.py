@@ -3,6 +3,7 @@ from docx import Document
 import os
 import logging
 import re
+from docx2pdf import convert  # 导入 docx2pdf 库
 
 # 配置日志记录
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -86,9 +87,15 @@ def generate_documents(excel_path, template_path, output_folder):
             placeholder_dict = {f"{{{{{col}}}}}": str(row[col]) for col in df.columns}
             replace_placeholder(doc, placeholder_dict)
             title = get_document_title(doc)
-            output_filename = f"{output_folder}/{title}.docx"
-            doc.save(output_filename)
-            print(f"生成文档：{output_filename}")
+            # 保存为临时 Word 文件
+            temp_docx_path = f"{output_folder}/{title}.docx"
+            doc.save(temp_docx_path)
+            # 转换为 PDF 文件
+            pdf_path = f"{output_folder}/{title}.pdf"
+            convert(temp_docx_path, pdf_path)
+            # 删除删除临时 Word 文件的代码
+            # os.remove(temp_docx_path)
+            print(f"生成文档：{pdf_path}")
         except Exception as e:
             print(f"生成第 {index + 1} 个文档时出错: {e}")
 
