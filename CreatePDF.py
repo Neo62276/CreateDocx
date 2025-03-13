@@ -292,15 +292,17 @@ def create_pdf(requirement_purpose, background, test_area, mode, node_number, fm
 
     # 创建注释表格
     comments_table = create_comments_table(doc)
-    elements.append(comments_table)
-
-    # 添加有明确高度的空白段落用于分隔表格
-    spacer = Paragraph("<br/>" * 2, styles['Normal'])  # 可调整 <br/> 的数量改变间距
-    elements.append(spacer)
 
     # 创建执行、见证、批准表格
     ewa_table = create_ewa_table(doc)
-    elements.append(ewa_table)
+
+    # 添加有明确高度的空白段落用于分隔表格
+    spacer = Paragraph("<br/>" * 2, styles['Normal'])  # 可调整 <br/> 的数量改变间距
+
+    # 使用 KeepTogether 确保注释表格和 EWA 表格不跨页
+    from reportlab.platypus import KeepTogether
+    combined_elements = KeepTogether([comments_table, spacer, ewa_table])
+    elements.append(combined_elements)
 
     # 添加分页符（如果需要）
     elements.append(PageBreak())
