@@ -139,6 +139,8 @@ def create_procedure_table(doc, steps):
     custom_style.fontSize = 8
     data = [["Procedure", "Pass"]]
     for i, step in enumerate(steps, start=1):
+        # 把步骤内容中的换行符替换为 <br/>
+        step = step.replace('\n', '<br/>')
         # 创建一个带缩进的段落
         bullet_style = custom_style.clone('BulletStyle')
         # 计算序号的位数
