@@ -7,6 +7,9 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+# 新增导入 tkinter 库
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 # 定义一个常量，代表每个数字所占的宽度
 DIGIT_WIDTH = 4
@@ -310,29 +313,79 @@ def sanitize_filename(filename):
     """
     return re.sub(r'[\\/*?:"<>|]', '_', filename)
 
+def select_excel_file():
+    file_path = filedialog.askopenfilename(title="选择 Excel 文件", filetypes=[("Excel files", "*.xlsx")])
+    if file_path:
+        excel_path_entry.delete(0, tk.END)
+        excel_path_entry.insert(0, file_path)
+
+def select_output_directory():
+    dir_path = filedialog.askdirectory(title="选择保存 PDF 文件的目录")
+    if dir_path:
+        output_dir_entry.delete(0, tk.END)
+        output_dir_entry.insert(0, dir_path)
+
+def generate_pdfs():
+    excel_file_path = excel_path_entry.get()
+    save_directory = output_dir_entry.get()
+
+    if not excel_file_path or not save_directory:
+        messagebox.showerror("错误", "请选择 Excel 文件和保存目录")
+        return
+
+    try:
+        df = pd.read_excel(excel_file_path)
+        for index, row in df.iterrows():
+            steps = row['steps'].split(';') if isinstance(row['steps'], str) else []
+            title = row['title']
+            sanitized_title = sanitize_filename(title)
+            doc_name = os.path.join(save_directory, f"{sanitized_title}.pdf")
+            create_pdf(
+                row['requirement_purpose'],
+                row['background'],
+                row['test_area'],
+                row['mode'],
+                row['node_number'],
+                row['fmea'],
+                title,
+                steps,
+                doc_name
+            )
+            logging.info(f"Generated PDF: {doc_name}")
+        messagebox.showinfo("完成", "PDF 文件生成完成")
+    except Exception as e:
+        messagebox.showerror("错误", f"生成 PDF 时出现错误: {str(e)}")
+
 # 配置日志
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-if __name__ == "__main__":
-    # 读取 Excel 文件
-    df = pd.read_excel('data.xlsx')
+# 创建主窗口
+root = tk.Tk()
+root.title("PDF 生成器")
 
-    for index, row in df.iterrows():
-        # 假设 steps 列中的步骤以分号分隔
-        steps = row['steps'].split(';') if isinstance(row['steps'], str) else []
-        title = row['title']
-        sanitized_title = sanitize_filename(title)
-        doc_name = f"{sanitized_title}.pdf"
-        create_pdf(
-            row['requirement_purpose'],
-            row['background'],
-            row['test_area'],
-            row['mode'],
-            row['node_number'],
-            row['fmea'],
-            title,
-            steps,
-            doc_name
-        )
-        # 记录生成的 PDF 文件名
-        logging.info(f"Generated PDF: {doc_name}")
+# 创建选择 Excel 文件的组件
+excel_path_label = tk.Label(root, text="选择 Excel 文件:")
+excel_path_label.pack(pady=10)
+
+excel_path_entry = tk.Entry(root, width=50)
+excel_path_entry.pack(pady=5)
+
+excel_select_button = tk.Button(root, text="选择文件", command=select_excel_file)
+excel_select_button.pack(pady=5)
+
+# 创建选择输出目录的组件
+output_dir_label = tk.Label(root, text="选择保存目录:")
+output_dir_label.pack(pady=10)
+
+output_dir_entry = tk.Entry(root, width=50)
+output_dir_entry.pack(pady=5)
+
+output_dir_select_button = tk.Button(root, text="选择目录", command=select_output_directory)
+output_dir_select_button.pack(pady=5)
+
+# 创建生成 PDF 的按钮
+generate_button = tk.Button(root, text="生成 PDF", command=generate_pdfs)
+generate_button.pack(pady=20)
+
+# 运行主循环
+root.mainloop()
