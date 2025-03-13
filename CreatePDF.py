@@ -155,7 +155,7 @@ def create_procedure_table(doc, steps):
         data.append([step_paragraph, ""])
     # 调整列宽比例为 9:1
     col_widths = [doc.width * 0.9, doc.width * 0.1]
-    table = Table(data, colWidths=col_widths)
+    table = Table(data, colWidths=col_widths, repeatRows=1)  # 设置 repeatRows=1 使表头跨页显示
     # 设置表格样式，允许内容自动换行
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
