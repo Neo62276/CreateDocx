@@ -45,6 +45,8 @@ def replace_table_placeholder(table, placeholder_dict):
                         run.text = ''
                     # 设置第一个部分到当前单元格并添加序号
                     if paragraph.runs:
+                        paragraph.paragraph_format.left_indent = 120000
+                        paragraph.paragraph_format.first_line_indent = - 120000
                         num_run = paragraph.add_run("1. ")
                         num_run.font.size = Pt(10)  # 使用 Pt 类设置为 10 号字
                         content_run = paragraph.add_run(parts[0])
@@ -54,6 +56,10 @@ def replace_table_placeholder(table, placeholder_dict):
                         new_row = table.add_row()
                         new_cell = new_row.cells[col_idx]
                         new_paragraph = new_cell.paragraphs[0]
+                        # 动态设置新段落的左缩进和首行缩进
+                        digit_count = len(str(i))
+                        new_paragraph.paragraph_format.left_indent = 120000 + (digit_count - 1) * 80000
+                        new_paragraph.paragraph_format.first_line_indent = - (120000 + (digit_count - 1) * 80000)
                         num_run = new_paragraph.add_run(f"{i}. ")
                         num_run.font.size = Pt(10)  # 使用 Pt 类设置为 10 号字
                         content_run = new_paragraph.add_run(part)
