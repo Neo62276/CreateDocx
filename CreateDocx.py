@@ -4,7 +4,7 @@ import os
 import logging
 import re
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 # 配置日志记录
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -130,32 +130,78 @@ def generate_documents(excel_path, template_path, output_folder):
         except Exception as e:
             print(f"生成第 {index + 1} 个文档时出错: {e}")
 
-# 主函数
-def main():
-    root = tk.Tk()
-    root.withdraw()
+# 函数：获取文档标题
+def select_excel_file():
+    file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
+    if file_path:
+        excel_path_entry.delete(0, tk.END)
+        excel_path_entry.insert(0, file_path)
 
-    excel_path = filedialog.askopenfilename(title="选择 Excel 文件", filetypes=[("Excel files", "*.xlsx")])
-    if not excel_path:
-        print("未选择 Excel 文件，程序退出。")
-        return
+def select_template_file():
+    file_path = filedialog.askopenfilename(filetypes=[("Word files", "*.docx")])
+    if file_path:
+        template_path_entry.delete(0, tk.END)
+        template_path_entry.insert(0, file_path)
 
-    template_path = filedialog.askopenfilename(title="选择 Word 模板文件", filetypes=[("Word files", "*.docx")])
-    if not template_path:
-        print("未选择 Word 模板文件，程序退出。")
-        return
+# 新增函数：选择输出文件夹
+def select_output_folder():
+    folder_path = filedialog.askdirectory()
+    if folder_path:
+        output_folder_entry.delete(0, tk.END)
+        output_folder_entry.insert(0, folder_path)
 
-    output_folder = filedialog.askdirectory(title="选择输出文件夹")
+def run_generation():
+    excel_path = excel_path_entry.get()
+    template_path = template_path_entry.get()
+    output_folder = output_folder_entry.get()
+
+    # 如果用户没有选择输出文件夹，使用默认路径
     if not output_folder:
-        print("未选择输出文件夹，程序退出。")
-        return
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        output_folder = os.path.join(script_dir, 'output')
+
+    # 创建输出文件夹（如果不存在）
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
 
     try:
-        print(f"开始处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)}")
+        print(f"开始处理 {excel_path} 和 {template_path}")
         generate_documents(excel_path, template_path, output_folder)
-        print(f"完成处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)}")
+        print(f"完成处理 {excel_path} 和 {template_path}")
+        messagebox.showinfo("完成", "所有文档生成完成。")
     except Exception as e:
-        print(f"处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)} 时出错: {e}")
+        messagebox.showerror("错误", f"处理时出错: {e}")
 
-if __name__ == "__main__":
-    main()
+# 创建主窗口
+root = tk.Tk()
+root.title("文档生成工具")
+
+# 创建标签和输入框
+excel_label = tk.Label(root, text="Excel 文件路径:")
+excel_label.pack()
+excel_path_entry = tk.Entry(root, width=50)
+excel_path_entry.pack()
+excel_button = tk.Button(root, text="选择 Excel 文件", command=select_excel_file)
+excel_button.pack()
+
+template_label = tk.Label(root, text="Word 模板文件路径:")
+template_label.pack()
+template_path_entry = tk.Entry(root, width=50)
+template_path_entry.pack()
+template_button = tk.Button(root, text="选择 Word 模板文件", command=select_template_file)
+template_button.pack()
+
+# 新增：输出文件夹标签和输入框
+output_folder_label = tk.Label(root, text="输出文件夹路径:")
+output_folder_label.pack()
+output_folder_entry = tk.Entry(root, width=50)
+output_folder_entry.pack()
+output_folder_button = tk.Button(root, text="选择输出文件夹", command=select_output_folder)
+output_folder_button.pack()
+
+# 创建运行按钮
+run_button = tk.Button(root, text="生成文档", command=run_generation)
+run_button.pack()
+
+# 运行主循环
+root.mainloop()
