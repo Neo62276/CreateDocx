@@ -30,6 +30,23 @@ def replace_paragraph_placeholder(paragraph, placeholder_dict):
 # 函数：替换表格中的占位符
 def replace_table_placeholder(table, placeholder_dict):
     from docx.shared import Pt  # 导入 Pt 类用于设置字体大小
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    for row in table.rows:
+        # 确保行的 XML 元素有 w:trPr 节点
+        trPr = row._element.xpath('.//w:trPr')
+        if not trPr:
+            trPr = OxmlElement('w:trPr')
+            row._element.append(trPr)
+        else:
+            trPr = trPr[0]
+        # 检查是否已有 w:cantSplit 节点，没有则添加
+        cant_split = trPr.xpath('.//w:cantSplit')
+        if not cant_split:
+            cant_split = OxmlElement('w:cantSplit')
+            trPr.append(cant_split)
+
     for row_idx, row in enumerate(table.rows):
         for col_idx, cell in enumerate(row.cells):
             for paragraph in cell.paragraphs:
@@ -56,6 +73,17 @@ def replace_table_placeholder(table, placeholder_dict):
                     # 为其余部分添加新行并添加序号
                     for i, part in enumerate(parts[1:], start=2):
                         new_row = table.add_row()
+                        # 为新行设置 w:cantSplit 属性
+                        new_trPr = new_row._element.xpath('.//w:trPr')
+                        if not new_trPr:
+                            new_trPr = OxmlElement('w:trPr')
+                            new_row._element.append(new_trPr)
+                        else:
+                            new_trPr = new_trPr[0]
+                        new_cant_split = new_trPr.xpath('.//w:cantSplit')
+                        if not new_cant_split:
+                            new_cant_split = OxmlElement('w:cantSplit')
+                            new_trPr.append(new_cant_split)
                         new_cell = new_row.cells[col_idx]
                         new_paragraph = new_cell.paragraphs[0]
                         # 动态设置新段落的左缩进和首行缩进
