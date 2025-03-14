@@ -3,6 +3,8 @@ from docx import Document
 import os
 import logging
 import re
+import tkinter as tk
+from tkinter import filedialog
 
 # 配置日志记录
 logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -129,26 +131,31 @@ def generate_documents(excel_path, template_path, output_folder):
             print(f"生成第 {index + 1} 个文档时出错: {e}")
 
 # 主函数
+def main():
+    root = tk.Tk()
+    root.withdraw()
+
+    excel_path = filedialog.askopenfilename(title="选择 Excel 文件", filetypes=[("Excel files", "*.xlsx")])
+    if not excel_path:
+        print("未选择 Excel 文件，程序退出。")
+        return
+
+    template_path = filedialog.askopenfilename(title="选择 Word 模板文件", filetypes=[("Word files", "*.docx")])
+    if not template_path:
+        print("未选择 Word 模板文件，程序退出。")
+        return
+
+    output_folder = filedialog.askdirectory(title="选择输出文件夹")
+    if not output_folder:
+        print("未选择输出文件夹，程序退出。")
+        return
+
+    try:
+        print(f"开始处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)}")
+        generate_documents(excel_path, template_path, output_folder)
+        print(f"完成处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)}")
+    except Exception as e:
+        print(f"处理 {os.path.basename(excel_path)} 和 {os.path.basename(template_path)} 时出错: {e}")
+
 if __name__ == "__main__":
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_folder = os.path.join(script_dir, 'output')
-
-    # 创建输出文件夹（如果不存在）
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    # 定义 Excel 文件和模板文件的对应关系
-    file_mappings = [
-        ('data.xlsx', 'template.docx'),
-        # 可以继续添加更多对应关系
-    ]
-
-    for excel_name, template_name in file_mappings:
-        excel_path = os.path.join(script_dir, excel_name)
-        template_path = os.path.join(script_dir, template_name)
-        try:
-            print(f"开始处理 {excel_name} 和 {template_name}")
-            generate_documents(excel_path, template_path, output_folder)
-            print(f"完成处理 {excel_name} 和 {template_name}")
-        except Exception as e:
-            print(f"处理 {excel_name} 和 {template_name} 时出错: {e}")
+    main()
