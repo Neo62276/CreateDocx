@@ -329,6 +329,14 @@ def select_output_directory():
         output_dir_entry.delete(0, tk.END)
         output_dir_entry.insert(0, dir_path)
 
+def convert_to_string(value):
+    """
+    将值转换为字符串，如果值为 NaN 则转换为空字符串
+    :param value: 输入值
+    :return: 字符串类型的值
+    """
+    return str(value) if pd.notna(value) else ""
+
 def generate_pdfs():
     excel_file_path = excel_path_entry.get()
     save_directory = output_dir_entry.get()
@@ -340,17 +348,25 @@ def generate_pdfs():
     try:
         df = pd.read_excel(excel_file_path)
         for index, row in df.iterrows():
-            steps = row['steps'].split(';') if isinstance(row['steps'], str) else []
-            title = row['title']
+            # 确保所有需要的参数都是字符串类型
+            requirement_purpose = convert_to_string(row['requirement_purpose'])
+            background = convert_to_string(row['background'])
+            test_area = convert_to_string(row['test_area'])
+            mode = convert_to_string(row['mode'])
+            node_number = convert_to_string(row['node_number'])
+            fmea = convert_to_string(row['fmea'])
+            title = convert_to_string(row['title'])
+            steps_str = convert_to_string(row['steps'])
+            steps = steps_str.split(';')
             sanitized_title = sanitize_filename(title)
             doc_name = os.path.join(save_directory, f"{sanitized_title}.pdf")
             create_pdf(
-                row['requirement_purpose'],
-                row['background'],
-                row['test_area'],
-                row['mode'],
-                row['node_number'],
-                row['fmea'],
+                requirement_purpose,
+                background,
+                test_area,
+                mode,
+                node_number,
+                fmea,
                 title,
                 steps,
                 doc_name
