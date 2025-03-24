@@ -145,6 +145,9 @@ def generate_documents(excel_path, template_path, output_folder):
         raise FileNotFoundError(f"Word模板文件未找到: {template_path}")
 
     df = pd.read_excel(excel_path)
+    # 直接将 DataFrame 中的 nan 替换为空字符串
+    df = df.fillna('')  
+
     for index, row in df.iterrows():
         try:
             doc = Document(template_path)
@@ -158,7 +161,7 @@ def generate_documents(excel_path, template_path, output_folder):
         except Exception as e:
             print(f"生成第 {index + 1} 个文档时出错: {e}")
 
-# 函数：获取文档标题
+# 函数：选择 Excel 文件
 def select_excel_file():
     file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
     if file_path:
