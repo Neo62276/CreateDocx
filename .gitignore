@@ -1,0 +1,12 @@
+*.docx
+*.xlsx
+*.pptx
+*.pdf
+*.zip
+*.rar
+.vs/
+.vscode/
+Windows executables/
+output/
+*.spec
+.DS_Store
