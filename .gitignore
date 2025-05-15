@@ -10,3 +10,7 @@ Windows executables/
 output/
 *.spec
 .DS_Store
+build/
+dist/
+__pycache__/
+doc/
