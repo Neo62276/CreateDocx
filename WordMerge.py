@@ -27,7 +27,8 @@ def merge_word_documents(selected_path, output_file):
         # 依次合并其他文档
         for doc_file in docx_files[1:]:
             doc = Document(doc_file)
-            composer.doc.add_section()  # 添加分节符
+#           composer.doc.add_section()  # 添加分节符
+            composer.doc.add_page_break()  # 添加分页符
             composer.append(doc)
 
         # 保存合并后的文档
